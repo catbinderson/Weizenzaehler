@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <main class="app">
@@ -24,10 +24,21 @@
       <div class="eyebrow">HEUTE</div>
       <div id="todayDate" class="muted"></div>
       <div id="count" class="count">0</div>
-      <div class="unit">Hefeweizen</div>
+      <div class="unit">Hefeweizen gesamt</div>
+      <div class="today-split">
+        <div><span>Bezahlt</span><strong id="paidToday">0</strong></div>
+        <div class="free"><span>Kostenlos</span><strong id="freeToday">0</strong></div>
+      </div>
       <div id="runningTotal" class="money">0,00 €</div>
       <div id="currentPrice" class="muted">Aktueller Preis: 4,40 €</div>
-      <div class="counter-actions"><button id="minusBtn" class="minus">−1</button><button id="plusBtn" class="plus">+1 Bier</button></div>
+      <div class="add-actions">
+        <button id="plusBtn" class="plus">+1 bezahlt</button>
+        <button id="plusFreeBtn" class="free-plus">+1 kostenlos</button>
+      </div>
+      <div class="minus-actions">
+        <button id="minusBtn" class="minus">−1 bezahlt</button>
+        <button id="minusFreeBtn" class="minus free-minus">−1 kostenlos</button>
+      </div>
       <button id="closeDayBtn" class="close-day">Tagesabschluss</button>
     </section>
 
@@ -35,9 +46,9 @@
 
     <section class="section-head"><div><span class="eyebrow">STATISTIK</span><h2>Dein Überblick</h2></div></section>
     <section class="stats-grid">
-      <article class="card stat"><span>Week to date</span><strong id="wtdBeer">0</strong><small id="wtdCost">0,00 €</small></article>
-      <article class="card stat"><span>Month to date</span><strong id="mtdBeer">0</strong><small id="mtdCost">0,00 €</small></article>
-      <article class="card stat"><span>Year to date</span><strong id="ytdBeer">0</strong><small id="ytdCost">0,00 €</small></article>
+      <article class="card stat"><span>Week to date</span><strong id="wtdBeer">0</strong><div class="stat-split"><small id="wtdPaid">0 bezahlt</small><small id="wtdFree">0 kostenlos</small></div><small id="wtdCost">0,00 €</small></article>
+      <article class="card stat"><span>Month to date</span><strong id="mtdBeer">0</strong><div class="stat-split"><small id="mtdPaid">0 bezahlt</small><small id="mtdFree">0 kostenlos</small></div><small id="mtdCost">0,00 €</small></article>
+      <article class="card stat"><span>Year to date</span><strong id="ytdBeer">0</strong><div class="stat-split"><small id="ytdPaid">0 bezahlt</small><small id="ytdFree">0 kostenlos</small></div><small id="ytdCost">0,00 €</small></article>
     </section>
 
     <section class="card filters">
@@ -84,6 +95,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
