@@ -9,7 +9,7 @@
   const initial={
     current:{date:today(),paidCount:0,freeCount:0},
     prices:[{from:'2026-08-08',price:4.40}],
-    days:[{id:'seed-2026-08-08',date:'2026-08-08',paidCount:2,freeCount:0,count:2,unitPrice:4.40,total:8.80,closedAt:'2026-08-08T21:00:00.000Z'}]
+    days:[{id:'seed-2026-08-08',date:'2026-08-08',paidCount:2,freeCount:1,count:3,unitPrice:4.40,total:8.80,closedAt:'2026-08-08T21:00:00.000Z'}]
   };
   let state=safeParse()||structuredClone(initial);
   if(!Array.isArray(state.prices)||!state.prices.length)state.prices=initial.prices.slice();
@@ -24,6 +24,7 @@
       const free=Number(r.freeCount||0);
       return {id:String(r.id||`${Date.now()}-${Math.random().toString(36).slice(2,8)}`),date:String(r.date||''),paidCount:Math.max(0,Math.floor(paid)),freeCount:Math.max(0,Math.floor(free)),count:Math.max(0,Math.floor(paid+free)),unitPrice:Number(r.unitPrice||0),total:Number(r.total||0),closedAt:String(r.closedAt||'')};
     }).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&Number.isFinite(r.unitPrice)&&r.unitPrice>0&&Number.isFinite(r.total)&&r.total>=0);
+    const seed=state.days.find(r=>r.id==='seed-2026-08-08');if(seed&&seed.date==='2026-08-08'&&seed.paidCount===2&&seed.freeCount===0&&seed.total===8.80){seed.freeCount=1;seed.count=3}
     if(!state.current||state.current.date!==today())state.current={date:today(),paidCount:0,freeCount:0};
     if(!Number.isFinite(Number(state.current.paidCount)))state.current.paidCount=Number(state.current.count||0);
     state.current.paidCount=Math.max(0,Math.floor(Number(state.current.paidCount)||0));
