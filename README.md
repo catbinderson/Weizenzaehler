@@ -1,2 +1,3 @@
-# Weizenz-hler
-Weizenbierzähler mit Statistik
+# Hefeweizen-Counter
+
+Einfacher Hefeweizen-Counter mit Tagesabschluss, Statistik, Preishistorie und Datensicherung.
