@@ -1,12 +1,16 @@
 (()=>{
-  const KEY='weizenzaehler.v1';
+  const KEY='hefeweizen-counter.v1';
   const euro=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n||0);
   const pad=n=>String(n).padStart(2,'0');
   const isoDate=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   const today=()=>isoDate(new Date());
   const fmtDate=s=>new Intl.DateTimeFormat('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(`${s}T12:00:00`));
   const safeParse=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
-  const initial={current:{date:today(),count:0},prices:[{from:'2026-08-09',price:4.40}],days:[]};
+  const initial={
+    current:{date:today(),count:0},
+    prices:[{from:'2026-08-08',price:4.40}],
+    days:[{id:'seed-2026-08-08',date:'2026-08-08',count:2,unitPrice:4.40,total:8.80,closedAt:'2026-08-08T21:00:00.000Z'}]
+  };
   let state=safeParse()||structuredClone(initial);
   if(!Array.isArray(state.prices)||!state.prices.length)state.prices=initial.prices.slice();
   if(!Array.isArray(state.days))state.days=[];
@@ -44,8 +48,8 @@
   $('#confirmClose').addEventListener('click',()=>{const count=state.current.count;if(!count)return;const date=state.current.date,unitPrice=priceFor(date),total=Number((count*unitPrice).toFixed(2));state.days.push({id:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,date,count,unitPrice,total,closedAt:new Date().toISOString()});state.current={date:today(),count:0};save();$('#confirmModal').classList.add('hidden');$('#lastClose').classList.remove('hidden');$('#lastClose').innerHTML=`<strong>✓ Tagesabschluss gespeichert</strong><div>${count} Hefeweizen · ${euro(total)}</div>`;render()});
   $('#openSettings').addEventListener('click',()=>$('#settingsModal').classList.remove('hidden'));$('#closeSettings').addEventListener('click',()=>$('#settingsModal').classList.add('hidden'));
   $('#savePrice').addEventListener('click',()=>{const price=Number(String($('#priceInput').value).replace(',','.')),from=$('#priceFrom').value;if(!from||!Number.isFinite(price)||price<=0){alert('Bitte gültigen Preis und Datum eingeben.');return}state.prices=state.prices.filter(x=>x.from!==from);state.prices.push({from,price:Number(price.toFixed(2))});save();render();setBackupStatus('Preis gespeichert.');});
-  $('#exportBackup').addEventListener('click',()=>{save();const payload={app:'WeizenZähler',format:1,exportedAt:new Date().toISOString(),...state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`weizenzaehler-sicherung-${today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setBackupStatus('Sicherung wurde erstellt.');});
+  $('#exportBackup').addEventListener('click',()=>{save();const payload={app:'Hefeweizen-Counter',format:1,exportedAt:new Date().toISOString(),...state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hefeweizen-counter-sicherung-${today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setBackupStatus('Sicherung wurde erstellt.');});
   $('#importBackup').addEventListener('click',()=>$('#backupFile').click());
-  $('#backupFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app&&data.app!=='WeizenZähler')throw new Error('Falsche Sicherungsdatei');if(!validImport(data))throw new Error('Ungültige Sicherungsdatei');if(!confirm(`Sicherung importieren?\n\n${data.days.length} abgeschlossene Tage und ${data.prices.length} Preise werden übernommen. Die aktuellen Daten werden ersetzt.`))return;state={current:data.current,prices:data.prices,days:data.days};save();render();setBackupStatus('✓ Sicherung erfolgreich wiederhergestellt.');}catch(err){console.error(err);setBackupStatus('Die Sicherungsdatei konnte nicht importiert werden.',false)}finally{e.target.value=''}});
+  $('#backupFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app&&data.app!=='Hefeweizen-Counter')throw new Error('Falsche Sicherungsdatei');if(!validImport(data))throw new Error('Ungültige Sicherungsdatei');if(!confirm(`Sicherung importieren?\n\n${data.days.length} abgeschlossene Tage und ${data.prices.length} Preise werden übernommen. Die aktuellen Daten werden ersetzt.`))return;state={current:data.current,prices:data.prices,days:data.days};save();render();setBackupStatus('✓ Sicherung erfolgreich wiederhergestellt.');}catch(err){console.error(err);setBackupStatus('Die Sicherungsdatei konnte nicht importiert werden.',false)}finally{e.target.value=''}});
   $('#weekSelect').addEventListener('change',render);$('#monthSelect').addEventListener('change',render);addEventListener('storage',render);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render()});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));render();
 })();
