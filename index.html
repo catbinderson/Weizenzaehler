@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon-192.png?v=20" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=20">
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
   <main class="app">
@@ -28,7 +28,11 @@
     </header>
 
     <section class="card today-card">
-      <div class="eyebrow">HEUTE</div>
+      <div class="today-head">
+        <span aria-hidden="true"></span>
+        <div class="eyebrow">HEUTE</div>
+        <time id="currentTime" class="current-time"></time>
+      </div>
       <div id="todayDate" class="muted"></div>
       <div class="count-stage">
         <img class="count-glass count-glass-left" src="beer-glass.svg?v=19" alt="" aria-hidden="true">
@@ -95,6 +99,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=22"></script>
+  <script src="app.js?v=23"></script>
 </body>
 </html>
