@@ -1,1 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="beer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd36a"/><stop offset="1" stop-color="#d88b18"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".65"/><stop offset=".5" stop-color="#fff" stop-opacity=".15"/><stop offset="1" stop-color="#fff" stop-opacity=".55"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="#120f0a"/><ellipse cx="256" cy="430" rx="105" ry="24" fill="#000" opacity=".28"/><path d="M178 66h156l-18 337c-2 35-25 55-60 55s-58-20-60-55L178 66z" fill="#f6f2e8" stroke="#fff7e2" stroke-width="10"/><path d="M194 132h124l-15 267c-2 24-18 37-47 37s-45-13-47-37l-15-267z" fill="url(#beer)"/><path d="M185 105c5-28 24-45 49-45 13 0 25 5 34 13 10-8 22-13 36-13 29 0 48 19 48 47 0 12-3 22-9 31H185c-4-10-4-22 0-33z" fill="#fff8e7"/><path d="M205 78h102" stroke="#fff" stroke-width="14" stroke-linecap="round" opacity=".6"/><path d="M205 81h28l-17 331c-1 14 7 22 20 27" fill="none" stroke="url(#glass)" stroke-width="13" opacity=".8"/><g transform="translate(0 15)"><path d="M230 225l26-22 26 22-10 34h-32z" fill="#fff" stroke="#173a77" stroke-width="6"/><path d="M244 213h24v36h-24z" fill="#d5202a" opacity=".9"/><circle cx="256" cy="231" r="7" fill="#f0c34b"/></g><text x="256" y="307" text-anchor="middle" font-family="Georgia,serif" font-size="36" font-weight="700" fill="#163d7a">Fürstenberg</text><text x="256" y="334" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="800" letter-spacing="3" fill="#7f1d1d">SEIT 1283</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Volles Weizenbierglas mit Schaumkrone">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b1c0b"/>
+      <stop offset="1" stop-color="#090705"/>
+    </linearGradient>
+    <linearGradient id="beer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd85e"/>
+      <stop offset=".45" stop-color="#f2ad23"/>
+      <stop offset="1" stop-color="#b85f08"/>
+    </linearGradient>
+    <linearGradient id="foam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f6dfae"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity=".78"/>
+      <stop offset=".32" stop-color="#fff" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".42"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-30%" width="180%" height="190%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="228" r="176" fill="#e99b1d" opacity=".08"/>
+  <ellipse cx="256" cy="448" rx="112" ry="22" fill="#000" opacity=".55" filter="url(#shadow)"/>
+  <path d="M163 82h186l-25 324c-3 42-29 65-68 65s-65-23-68-65L163 82z" fill="#fff" fill-opacity=".16" stroke="#fff3d3" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M181 126h150l-21 276c-2 31-19 48-54 48s-52-17-54-48L181 126z" fill="url(#beer)"/>
+  <path d="M181 124c0-25 18-44 42-44 9 0 18 3 25 8 11-20 30-32 52-32 32 0 57 25 57 57 0 21-11 40-28 50H184c-10-10-16-23-16-38 0-18 9-34 23-43" fill="url(#foam)" stroke="#fff9e9" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="215" cy="115" r="27" fill="#fff9e9"/>
+  <circle cx="263" cy="93" r="34" fill="#fffdf7"/>
+  <circle cx="311" cy="111" r="31" fill="#fff8e9"/>
+  <path d="M184 151c25 13 45 2 63 9 24 9 47 13 82-2l-2 32c-22 14-46 6-69 1-28-6-46 8-76-3z" fill="#fff2cf" opacity=".92"/>
+  <path d="M199 151l-19 0 20 257c2 27 16 42 42 48" fill="none" stroke="url(#shine)" stroke-width="15" stroke-linecap="round" opacity=".9"/>
+  <path d="M307 180l-17 231" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".23"/>
+  <g fill="#fff4c9" opacity=".7">
+    <circle cx="230" cy="244" r="5"/><circle cx="277" cy="274" r="4"/><circle cx="246" cy="322" r="4"/>
+    <circle cx="291" cy="356" r="5"/><circle cx="222" cy="381" r="4"/><circle cx="267" cy="411" r="3"/>
+  </g>
+  <path d="M193 410c23 11 102 11 126 0" fill="none" stroke="#fff6dd" stroke-width="6" opacity=".4"/>
+</svg>
