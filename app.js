@@ -31,10 +31,11 @@
     state.current.freeCount=Math.max(0,Math.floor(Number(state.current.freeCount)||0));
     delete state.current.count;
     if(state.current.date!==today()){
-      const paid=state.current.paidCount,free=state.current.freeCount,count=paid+free;
-      if(count){
-        const date=state.current.date,unitPrice=priceFor(date),total=Number((paid*unitPrice).toFixed(2));
-        state.days.push({id:`auto-${date}-${Date.now()}`,date,paidCount:paid,freeCount:free,count,unitPrice,total,closedAt:new Date().toISOString()});
+      const paid=state.current.paidCount,free=state.current.freeCount,count=paid+free,date=state.current.date;
+      const alreadyInHistory=state.days.some(r=>r.date===date&&r.paidCount===paid&&r.freeCount===free&&r.count===count);
+      if(count&&!alreadyInHistory){
+        const unitPrice=priceFor(date),total=Number((paid*unitPrice).toFixed(2));
+        state.days.push({id:`auto-${date}`,date,paidCount:paid,freeCount:free,count,unitPrice,total,closedAt:new Date().toISOString()});
       }
       state.current={date:today(),paidCount:0,freeCount:0};
     }
