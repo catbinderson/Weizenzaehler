@@ -51,6 +51,7 @@
     return rows;
   }
   const $=s=>document.querySelector(s);
+  function renderClock(){const el=$('#currentTime');if(!el)return;const now=new Date();el.dateTime=now.toISOString();el.textContent=new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(now)}
   function mondayOf(d){const x=new Date(d);const day=x.getDay()||7;x.setHours(0,0,0,0);x.setDate(x.getDate()-day+1);return x}
   function monthStart(d){return new Date(d.getFullYear(),d.getMonth(),1)}
   function yearStart(d){return new Date(d.getFullYear(),0,1)}
@@ -88,5 +89,5 @@
   $('#exportBackup').addEventListener('click',()=>{save();const payload={app:'Hefeweizen-Counter',format:2,exportedAt:new Date().toISOString(),...state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hefeweizen-counter-sicherung-${today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setBackupStatus('Sicherung wurde erstellt.');});
   $('#importBackup').addEventListener('click',()=>$('#backupFile').click());
   $('#backupFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app&&data.app!=='Hefeweizen-Counter')throw new Error('Falsche Sicherungsdatei');if(!validImport(data))throw new Error('Ungültige Sicherungsdatei');if(!confirm(`Sicherung importieren?\n\n${data.days.length} abgeschlossene Tage und ${data.prices.length} Preise werden übernommen. Die aktuellen Daten werden ersetzt.`))return;state={current:data.current||{date:today(),paidCount:0,freeCount:0},prices:data.prices,days:data.days};save();render();setBackupStatus('✓ Sicherung erfolgreich wiederhergestellt.');}catch(err){console.error(err);setBackupStatus('Die Sicherungsdatei konnte nicht importiert werden.',false)}finally{e.target.value=''}});
-  $('#weekSelect').addEventListener('change',render);$('#monthSelect').addEventListener('change',render);addEventListener('storage',render);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render()});if('serviceWorker'in navigator)addEventListener('load',async()=>{try{const registration=await navigator.serviceWorker.register('sw.js?v=22',{updateViaCache:'none'});await registration.update()}catch{}});render();
+  $('#weekSelect').addEventListener('change',render);$('#monthSelect').addEventListener('change',render);addEventListener('storage',render);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render()});if('serviceWorker'in navigator)addEventListener('load',async()=>{try{const registration=await navigator.serviceWorker.register('sw.js?v=23',{updateViaCache:'none'});await registration.update()}catch{}});renderClock();setInterval(renderClock,1000);render();
 })();
