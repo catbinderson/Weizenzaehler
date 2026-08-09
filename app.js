@@ -25,16 +25,29 @@
       return {id:String(r.id||`${Date.now()}-${Math.random().toString(36).slice(2,8)}`),date:String(r.date||''),paidCount:Math.max(0,Math.floor(paid)),freeCount:Math.max(0,Math.floor(free)),count:Math.max(0,Math.floor(paid+free)),unitPrice:Number(r.unitPrice||0),total:Number(r.total||0),closedAt:String(r.closedAt||'')};
     }).filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&Number.isFinite(r.unitPrice)&&r.unitPrice>0&&Number.isFinite(r.total)&&r.total>=0);
     const seed=state.days.find(r=>r.id==='seed-2026-08-08');if(seed&&seed.date==='2026-08-08'&&seed.paidCount===2&&seed.freeCount===0&&seed.total===8.80){seed.freeCount=1;seed.count=3}
-    if(!state.current||state.current.date!==today())state.current={date:today(),paidCount:0,freeCount:0};
+    if(!state.current)state.current={date:today(),paidCount:0,freeCount:0};
     if(!Number.isFinite(Number(state.current.paidCount)))state.current.paidCount=Number(state.current.count||0);
     state.current.paidCount=Math.max(0,Math.floor(Number(state.current.paidCount)||0));
     state.current.freeCount=Math.max(0,Math.floor(Number(state.current.freeCount)||0));
     delete state.current.count;
+    if(state.current.date!==today()){
+      const paid=state.current.paidCount,free=state.current.freeCount,count=paid+free;
+      if(count){
+        const date=state.current.date,unitPrice=priceFor(date),total=Number((paid*unitPrice).toFixed(2));
+        state.days.push({id:`auto-${date}-${Date.now()}`,date,paidCount:paid,freeCount:free,count,unitPrice,total,closedAt:new Date().toISOString()});
+      }
+      state.current={date:today(),paidCount:0,freeCount:0};
+    }
   }
   function save(){normalize();localStorage.setItem(KEY,JSON.stringify(state))}
   function priceFor(date){let value=state.prices[0]?.price||4.40;for(const p of state.prices){if(p.from<=date)value=p.price;else break}return Number(value)}
   function currentTotalCount(){return state.current.paidCount+state.current.freeCount}
   function totalForCurrent(){return state.current.paidCount*priceFor(state.current.date)}
+  function rowsWithCurrent(){
+    const rows=[...state.days],paid=state.current.paidCount,free=state.current.freeCount,count=paid+free;
+    if(count){const unitPrice=priceFor(state.current.date);rows.push({id:'current',date:state.current.date,paidCount:paid,freeCount:free,count,unitPrice,total:Number((paid*unitPrice).toFixed(2)),closedAt:new Date().toISOString(),current:true})}
+    return rows;
+  }
   const $=s=>document.querySelector(s);
   function mondayOf(d){const x=new Date(d);const day=x.getDay()||7;x.setHours(0,0,0,0);x.setDate(x.getDate()-day+1);return x}
   function monthStart(d){return new Date(d.getFullYear(),d.getMonth(),1)}
@@ -54,27 +67,24 @@
   function render(){
     normalize();save();const p=priceFor(state.current.date),all=currentTotalCount();
     $('#todayDate').textContent=fmtDate(state.current.date);$('#count').textContent=all;$('#paidToday').textContent=state.current.paidCount;$('#freeToday').textContent=state.current.freeCount;$('#runningTotal').textContent=euro(totalForCurrent());$('#currentPrice').textContent=`Aktueller Preis: ${euro(p)}`;
-    $('#minusBtn').disabled=state.current.paidCount<=0;$('#minusFreeBtn').disabled=state.current.freeCount<=0;$('#closeDayBtn').disabled=all<=0;
-    const now=new Date(),todayEnd=new Date();todayEnd.setHours(23,59,59,999);
-    renderStat('wtd',aggregate(state.days.filter(r=>inRange(r,mondayOf(now),todayEnd))));renderStat('mtd',aggregate(state.days.filter(r=>inRange(r,monthStart(now),todayEnd))));renderStat('ytd',aggregate(state.days.filter(r=>inRange(r,yearStart(now),todayEnd))));
-    const w=$('#weekSelect').value||isoWeekString(now);$('#weekSelect').value=w;const [ws,we]=weekRange(w);$('#weekResult').innerHTML=periodHtml(aggregate(state.days.filter(r=>inRange(r,ws,we))),`KW ${Number(w.split('W')[1])}`);
-    const mv=$('#monthSelect').value||`${now.getFullYear()}-${pad(now.getMonth()+1)}`;$('#monthSelect').value=mv;const [ms,me]=monthRange(mv);$('#monthResult').innerHTML=periodHtml(aggregate(state.days.filter(r=>inRange(r,ms,me))),new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(ms));
-    const history=[...state.days].sort((a,b)=>(b.closedAt||b.date).localeCompare(a.closedAt||a.date));$('#history').innerHTML=history.length?history.map(r=>`<div class="history-row"><div><strong>${fmtDate(r.date)}</strong><small>${r.count} Bier · ${r.paidCount} bezahlt · ${r.freeCount} kostenlos</small><small>${r.paidCount} × ${euro(r.unitPrice)}</small></div><div class="amount">${euro(r.total)}</div></div>`).join(''):'<div class="history-empty">Noch kein Tagesabschluss gespeichert.</div>';
+    $('#minusBtn').disabled=state.current.paidCount<=0;$('#minusFreeBtn').disabled=state.current.freeCount<=0;
+    const now=new Date(),todayEnd=new Date();todayEnd.setHours(23,59,59,999),rows=rowsWithCurrent();
+    renderStat('wtd',aggregate(rows.filter(r=>inRange(r,mondayOf(now),todayEnd))));renderStat('mtd',aggregate(rows.filter(r=>inRange(r,monthStart(now),todayEnd))));renderStat('ytd',aggregate(rows.filter(r=>inRange(r,yearStart(now),todayEnd))));
+    const w=$('#weekSelect').value||isoWeekString(now);$('#weekSelect').value=w;const [ws,we]=weekRange(w);$('#weekResult').innerHTML=periodHtml(aggregate(rows.filter(r=>inRange(r,ws,we))),`KW ${Number(w.split('W')[1])}`);
+    const mv=$('#monthSelect').value||`${now.getFullYear()}-${pad(now.getMonth()+1)}`;$('#monthSelect').value=mv;const [ms,me]=monthRange(mv);$('#monthResult').innerHTML=periodHtml(aggregate(rows.filter(r=>inRange(r,ms,me))),new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(ms));
+    const history=[...rows].sort((a,b)=>(b.date).localeCompare(a.date));$('#history').innerHTML=history.length?history.map(r=>`<div class="history-row"><div><strong>${fmtDate(r.date)}${r.current?' · heute':''}</strong><small>${r.count} Bier · ${r.paidCount} bezahlt · ${r.freeCount} kostenlos</small><small>${r.paidCount} × ${euro(r.unitPrice)}</small></div><div class="amount">${euro(r.total)}</div></div>`).join(''):'<div class="history-empty">Noch keine Einträge gespeichert.</div>';
     $('#priceHistory').innerHTML=[...state.prices].reverse().map((x,i)=>`<div class="price-row"><span>ab ${new Intl.DateTimeFormat('de-DE').format(new Date(`${x.from}T12:00:00`))}${i===0?' · aktuell':''}</span><b>${euro(x.price)}</b></div>`).join('');$('#priceInput').value=p.toFixed(2);$('#priceFrom').value=today();
   }
   function setBackupStatus(text,ok=true){const el=$('#backupStatus');if(!el)return;el.textContent=text;el.classList.toggle('ok',ok);el.classList.toggle('error',!ok)}
-  function validImport(data){return data&&typeof data==='object'&&Array.isArray(data.prices)&&Array.isArray(data.days)&&data.current&&typeof data.current==='object'}
-  $('#plusBtn').addEventListener('click',()=>{state.current.paidCount++;save();render()});
-  $('#plusFreeBtn').addEventListener('click',()=>{state.current.freeCount++;save();render()});
-  $('#minusBtn').addEventListener('click',()=>{state.current.paidCount=Math.max(0,state.current.paidCount-1);save();render()});
-  $('#minusFreeBtn').addEventListener('click',()=>{state.current.freeCount=Math.max(0,state.current.freeCount-1);save();render()});
-  $('#closeDayBtn').addEventListener('click',()=>{const p=priceFor(state.current.date),all=currentTotalCount();$('#confirmText').innerHTML=`<strong>${all} Hefeweizen gesamt</strong><br>${state.current.paidCount} bezahlt × ${euro(p)} = <strong>${euro(totalForCurrent())}</strong><br>${state.current.freeCount} kostenlos = ${euro(0)}`;$('#confirmModal').classList.remove('hidden')});
-  $('#cancelClose').addEventListener('click',()=>$('#confirmModal').classList.add('hidden'));
-  $('#confirmClose').addEventListener('click',()=>{const paid=state.current.paidCount,free=state.current.freeCount,count=paid+free;if(!count)return;const date=state.current.date,unitPrice=priceFor(date),total=Number((paid*unitPrice).toFixed(2));state.days.push({id:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,date,paidCount:paid,freeCount:free,count,unitPrice,total,closedAt:new Date().toISOString()});state.current={date:today(),paidCount:0,freeCount:0};save();$('#confirmModal').classList.add('hidden');$('#lastClose').classList.remove('hidden');$('#lastClose').innerHTML=`<strong>✓ Tagesabschluss gespeichert</strong><div>${count} Hefeweizen · ${paid} bezahlt · ${free} kostenlos · ${euro(total)}</div>`;render()});
+  function validImport(data){return data&&typeof data==='object'&&Array.isArray(data.prices)&&Array.isArray(data.days)}
+  $('#plusBtn').addEventListener('click',()=>{normalize();state.current.paidCount++;save();render()});
+  $('#plusFreeBtn').addEventListener('click',()=>{normalize();state.current.freeCount++;save();render()});
+  $('#minusBtn').addEventListener('click',()=>{normalize();state.current.paidCount=Math.max(0,state.current.paidCount-1);save();render()});
+  $('#minusFreeBtn').addEventListener('click',()=>{normalize();state.current.freeCount=Math.max(0,state.current.freeCount-1);save();render()});
   $('#openSettings').addEventListener('click',()=>$('#settingsModal').classList.remove('hidden'));$('#closeSettings').addEventListener('click',()=>$('#settingsModal').classList.add('hidden'));
   $('#savePrice').addEventListener('click',()=>{const price=Number(String($('#priceInput').value).replace(',','.')),from=$('#priceFrom').value;if(!from||!Number.isFinite(price)||price<=0){alert('Bitte gültigen Preis und Datum eingeben.');return}state.prices=state.prices.filter(x=>x.from!==from);state.prices.push({from,price:Number(price.toFixed(2))});save();render();setBackupStatus('Preis gespeichert.');});
   $('#exportBackup').addEventListener('click',()=>{save();const payload={app:'Hefeweizen-Counter',format:2,exportedAt:new Date().toISOString(),...state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hefeweizen-counter-sicherung-${today()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setBackupStatus('Sicherung wurde erstellt.');});
   $('#importBackup').addEventListener('click',()=>$('#backupFile').click());
-  $('#backupFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app&&data.app!=='Hefeweizen-Counter')throw new Error('Falsche Sicherungsdatei');if(!validImport(data))throw new Error('Ungültige Sicherungsdatei');if(!confirm(`Sicherung importieren?\n\n${data.days.length} abgeschlossene Tage und ${data.prices.length} Preise werden übernommen. Die aktuellen Daten werden ersetzt.`))return;state={current:data.current,prices:data.prices,days:data.days};save();render();setBackupStatus('✓ Sicherung erfolgreich wiederhergestellt.');}catch(err){console.error(err);setBackupStatus('Die Sicherungsdatei konnte nicht importiert werden.',false)}finally{e.target.value=''}});
+  $('#backupFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app&&data.app!=='Hefeweizen-Counter')throw new Error('Falsche Sicherungsdatei');if(!validImport(data))throw new Error('Ungültige Sicherungsdatei');if(!confirm(`Sicherung importieren?\n\n${data.days.length} abgeschlossene Tage und ${data.prices.length} Preise werden übernommen. Die aktuellen Daten werden ersetzt.`))return;state={current:data.current||{date:today(),paidCount:0,freeCount:0},prices:data.prices,days:data.days};save();render();setBackupStatus('✓ Sicherung erfolgreich wiederhergestellt.');}catch(err){console.error(err);setBackupStatus('Die Sicherungsdatei konnte nicht importiert werden.',false)}finally{e.target.value=''}});
   $('#weekSelect').addEventListener('change',render);$('#monthSelect').addEventListener('change',render);addEventListener('storage',render);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render()});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));render();
 })();
